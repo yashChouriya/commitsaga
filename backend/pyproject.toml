@@ -1,0 +1,31 @@
+[project]
+name = "commitsaga-backend"
+version = "0.1.0"
+description = "CommitSaga backend - A tool for analyzing git repository history with AI-powered insights and contributor gamification"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Yash Chouriya" }
+]
+keywords = ["git", "analysis", "ai", "github", "repository", "commits"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Version Control :: Git",
+]
+dependencies = [
+    "anthropic>=0.75.0",
+    "celery>=5.6.2",
+    "cryptography>=46.0.3",
+    "django>=6.0.1",
+    "django-cors-headers>=4.9.0",
+    "django-extensions>=4.1",
+    "djangorestframework>=3.16.1",
+    "gunicorn>=23.0.0",
+    "psycopg2-binary>=2.9.11",
+    "pygithub>=2.8.1",
+    "python-decouple>=3.8",
+    "redis>=7.1.0",
+]
