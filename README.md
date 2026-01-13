@@ -52,7 +52,8 @@ commitsaga/
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.12+
+- uv (latest) - `pip install uv` or `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - Bun (latest)
 - PostgreSQL 15+
 - Redis
@@ -66,15 +67,14 @@ commitsaga/
    cd backend
    ```
 
-2. **Create virtual environment:**
+2. **Sync dependencies with uv:**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   uv sync
    ```
 
-3. **Install dependencies:**
+3. **Activate virtual environment:**
    ```bash
-   pip install -r requirements.txt
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
 4. **Set up environment variables:**
@@ -90,27 +90,27 @@ commitsaga/
 
 6. **Run migrations:**
    ```bash
-   python manage.py migrate
+   uv run python manage.py migrate
    ```
 
 7. **Create superuser:**
    ```bash
-   python manage.py createsuperuser
+   uv run python manage.py createsuperuser
    ```
 
 8. **Run development server:**
    ```bash
-   python manage.py runserver
+   uv run python manage.py runserver
    ```
 
 9. **Run Celery worker (in separate terminal):**
    ```bash
-   celery -A config worker -l info
+   uv run celery -A config worker -l info
    ```
 
 10. **Run Celery beat (in separate terminal):**
     ```bash
-    celery -A config beat -l info
+    uv run celery -A config beat -l info
     ```
 
 ### Frontend Setup
@@ -154,7 +154,8 @@ commitsaga/
 ├── backend/              # Django backend
 │   ├── config/          # Django settings & configuration
 │   ├── apps/            # Django apps (users, repositories, analysis, ai)
-│   ├── requirements.txt
+│   ├── pyproject.toml   # Python dependencies (managed by uv)
+│   ├── uv.lock          # Locked dependency versions
 │   └── manage.py
 ├── frontend/            # Next.js frontend
 │   ├── src/
