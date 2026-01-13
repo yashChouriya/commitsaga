@@ -50,11 +50,126 @@ commitsaga/
 
 ## Getting Started
 
-See [PLAN.md](./PLAN.md) for the complete implementation plan and setup instructions.
+### Prerequisites
+
+- Python 3.11+
+- Bun (latest)
+- PostgreSQL 15+
+- Redis
+- GitHub Personal Access Token
+- Anthropic API Key
+
+### Backend Setup
+
+1. **Navigate to backend directory:**
+   ```bash
+   cd backend
+   ```
+
+2. **Create virtual environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Create database:**
+   ```bash
+   createdb commitsaga
+   ```
+
+6. **Run migrations:**
+   ```bash
+   python manage.py migrate
+   ```
+
+7. **Create superuser:**
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+8. **Run development server:**
+   ```bash
+   python manage.py runserver
+   ```
+
+9. **Run Celery worker (in separate terminal):**
+   ```bash
+   celery -A config worker -l info
+   ```
+
+10. **Run Celery beat (in separate terminal):**
+    ```bash
+    celery -A config beat -l info
+    ```
+
+### Frontend Setup
+
+1. **Navigate to frontend directory:**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   bun install
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your configuration
+   ```
+
+4. **Run development server:**
+   ```bash
+   bun dev
+   ```
+
+5. **Open browser:**
+   Visit [http://localhost:3000](http://localhost:3000)
+
+### Additional Setup
+
+**Generate encryption key for GitHub tokens:**
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+Add this to your backend `.env` as `GITHUB_TOKEN_ENCRYPTION_KEY`
+
+## Project Structure
+
+```
+commitsaga/
+├── backend/              # Django backend
+│   ├── config/          # Django settings & configuration
+│   ├── apps/            # Django apps (users, repositories, analysis, ai)
+│   ├── requirements.txt
+│   └── manage.py
+├── frontend/            # Next.js frontend
+│   ├── src/
+│   │   ├── app/        # Next.js app router pages
+│   │   ├── components/ # React components
+│   │   ├── lib/        # Utilities and API client
+│   │   └── types/      # TypeScript type definitions
+│   └── package.json
+├── PLAN.md             # Detailed implementation plan
+└── CONTRIBUTOR_SCORING.md  # Scoring system documentation
+```
 
 ## Implementation Status
 
-This project is in the planning phase. Check PLAN.md for the detailed roadmap.
+Backend and frontend scaffolding completed. See [PLAN.md](./PLAN.md) for the detailed implementation roadmap.
 
 ---
 
