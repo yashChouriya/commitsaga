@@ -1,25 +1,54 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import Link from 'next/link';
-import { GitBranch, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  GitBranch,
+  Mail,
+  Lock,
+  User,
+  AlertCircle,
+  ArrowRight,
+  CheckCircle,
+} from "lucide-react";
+import {
+  AuthBackground,
+  GlassCard,
+  GlassInput,
+  Button,
+  AnimatedSection,
+} from "@/components/ui";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
+  const { user, loading: authLoading, signup } = useAuth();
+  const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (password !== password2) {
       setError("Passwords don't match");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
       return;
     }
 
@@ -30,137 +59,221 @@ export default function SignupPage() {
     } catch (err: any) {
       const errorData = err.response?.data;
       if (errorData) {
-        const errorMessage = errorData.email?.[0] || errorData.username?.[0] || errorData.password?.[0] || errorData.password2?.[0] || 'Failed to create account. Please try again.';
+        const errorMessage =
+          errorData.email?.[0] ||
+          errorData.username?.[0] ||
+          errorData.password?.[0] ||
+          errorData.password2?.[0] ||
+          errorData.non_field_errors?.[0] ||
+          "Failed to create account. Please try again.";
         setError(errorMessage);
       } else {
-        setError('Failed to create account. Please try again.');
+        setError("Failed to create account. Please try again.");
       }
     } finally {
       setLoading(false);
     }
   };
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+        <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Don't render if user is logged in (will redirect)
+  if (user) {
+    return null;
+  }
+
+  const passwordRequirements = [
+    { met: password.length >= 8, text: "At least 8 characters" },
+    {
+      met: password === password2 && password.length > 0,
+      text: "Passwords match",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+      <AuthBackground />
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-2">
-            <GitBranch className="h-8 w-8" />
-            <span className="text-2xl font-bold">CommitSaga</span>
+        <AnimatedSection animation="fade-down" delay={0}>
+          <Link
+            href="/"
+            className="flex items-center justify-center gap-3 mb-8 group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center group-hover:glow-sm transition-all">
+              <GitBranch className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-white">CommitSaga</span>
           </Link>
-          <h1 className="text-3xl font-bold mt-4">Create your account</h1>
-          <p className="text-gray-600 mt-2">Start analyzing your repositories today</p>
-        </div>
+        </AnimatedSection>
+
+        {/* Header */}
+        <AnimatedSection animation="fade-up" delay={100}>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Create your account
+            </h1>
+            <p className="text-gray-400">
+              Start analyzing your repositories today
+            </p>
+          </div>
+        </AnimatedSection>
 
         {/* Signup Form */}
-        <div className="bg-white p-8 rounded-lg shadow-lg border">
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+        <AnimatedSection animation="fade-up" delay={200}>
+          <GlassCard className="p-8">
+            {error && (
+              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-400 mt-0.5 shrink-0" />
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Email
+                </label>
+                <GlassInput
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="you@example.com"
+                  icon={<Mail className="w-5 h-5" />}
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Username
+                </label>
+                <GlassInput
                   id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="johndoe"
+                  icon={<User className="w-5 h-5" />}
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Password
+                </label>
+                <GlassInput
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="••••••••"
+                  icon={<Lock className="w-5 h-5" />}
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
-            </div>
 
-            <div>
-              <label htmlFor="password2" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
+              <div>
+                <label
+                  htmlFor="password2"
+                  className="block text-sm font-medium text-gray-300 mb-2"
+                >
+                  Confirm Password
+                </label>
+                <GlassInput
                   id="password2"
                   type="password"
                   value={password2}
                   onChange={(e) => setPassword2(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="••••••••"
+                  icon={<Lock className="w-5 h-5" />}
                 />
               </div>
+
+              {/* Password Requirements */}
+              {password.length > 0 && (
+                <div className="space-y-2">
+                  {passwordRequirements.map((req, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <CheckCircle
+                        className={`w-4 h-4 ${
+                          req.met ? "text-green-400" : "text-gray-600"
+                        }`}
+                      />
+                      <span
+                        className={req.met ? "text-green-400" : "text-gray-500"}
+                      >
+                        {req.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                loading={loading}
+                className="w-full"
+                size="lg"
+                icon={!loading ? <ArrowRight className="w-5 h-5" /> : undefined}
+              >
+                Create account
+              </Button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-white/10 text-center">
+              <p className="text-gray-400">
+                Already have an account?{" "}
+                <Link
+                  href="/login"
+                  className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                >
+                  Sign in
+                </Link>
+              </p>
             </div>
+          </GlassCard>
+        </AnimatedSection>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+        {/* Back to home */}
+        <AnimatedSection animation="fade-up" delay={300}>
+          <div className="mt-8 text-center">
+            <Link
+              href="/"
+              className="text-gray-500 hover:text-gray-300 text-sm transition-colors inline-flex items-center gap-2"
             >
-              {loading ? 'Creating account...' : 'Create account'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link href="/login" className="font-medium text-black hover:underline">
-                Sign in
-              </Link>
-            </p>
+              ← Back to home
+            </Link>
           </div>
-        </div>
+        </AnimatedSection>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <Link href="/" className="hover:underline">
-            ← Back to home
-          </Link>
-        </div>
+        {/* Decorative elements */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-violet-500/20 rounded-full filter blur-[80px] pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/20 rounded-full filter blur-[80px] pointer-events-none" />
       </div>
     </div>
   );
