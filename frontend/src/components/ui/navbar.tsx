@@ -99,7 +99,8 @@ export function Navbar() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          "md:hidden fixed inset-x-0 top-18.25 glass border-b border-white/5 transition-all duration-300",
+          "md:hidden fixed inset-x-0 top-[73px] border-b border-white/10 transition-all duration-300",
+          "bg-white/10 backdrop-blur-2xl backdrop-saturate-150",
           mobileMenuOpen
             ? "opacity-100 translate-y-0"
             : "opacity-0 -translate-y-4 pointer-events-none"
@@ -107,12 +108,12 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
           {loading ? (
-            <div className="w-full h-10 glass rounded-xl animate-pulse" />
+            <div className="w-full h-10 bg-white/5 rounded-xl animate-pulse" />
           ) : user ? (
             <>
               <Link
                 href="/dashboard"
-                className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors py-2"
+                className="flex items-center gap-3 text-white font-semibold hover:text-violet-400 transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <LayoutDashboard className="w-5 h-5" />
@@ -120,7 +121,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/settings"
-                className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors py-2"
+                className="flex items-center gap-3 text-white font-semibold hover:text-violet-400 transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Settings className="w-5 h-5" />
@@ -128,7 +129,7 @@ export function Navbar() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors py-2"
+                className="flex items-center gap-3 text-white font-semibold hover:text-violet-400 transition-colors py-2"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
@@ -138,7 +139,7 @@ export function Navbar() {
             <>
               <Link
                 href="/login"
-                className="text-gray-400 hover:text-white transition-colors py-2"
+                className="text-white font-semibold hover:text-violet-400 transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Login
