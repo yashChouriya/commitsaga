@@ -166,3 +166,86 @@ def check_pat_status(request):
         'github_username': user.github_username,
         'message': 'GitHub PAT configured' if user.has_github_token else 'GitHub PAT not configured'
     }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_github_repos(request):
+    """
+    List user's GitHub repositories
+    GET /api/auth/github-repos/
+    Query params:
+        - page: page number (default: 1)
+        - per_page: items per page (default: 30, max: 100)
+        - type: 'all', 'owner', 'public', 'private', 'member' (default: 'all')
+        - sort: 'created', 'updated', 'pushed', 'full_name' (default: 'updated')
+    """
+    user = request.user
+    github_token = user.get_github_token()
+
+    if not github_token:
+        return Response({
+            'error': 'GitHub token not configured. Please add your GitHub PAT in settings.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Get query params
+    page = int(request.query_params.get('page', 1))
+    per_page = min(int(request.query_params.get('per_page', 30)), 100)
+    repo_type = request.query_params.get('type', 'all')
+    sort = request.query_params.get('sort', 'updated')
+
+    try:
+        g = Github(github_token)
+        github_user = g.get_user()
+
+        # Get repositories
+        repos = github_user.get_repos(type=repo_type, sort=sort)
+
+        # Calculate pagination
+        total_count = repos.totalCount
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+
+        # Fetch repos for current page
+        repos_list = []
+        for i, repo in enumerate(repos):
+            if i < start_idx:
+                continue
+            if i >= end_idx:
+                break
+
+            repos_list.append({
+                'id': repo.id,
+                'name': repo.name,
+                'full_name': repo.full_name,
+                'description': repo.description,
+                'html_url': repo.html_url,
+                'clone_url': repo.clone_url,
+                'default_branch': repo.default_branch,
+                'private': repo.private,
+                'fork': repo.fork,
+                'stars_count': repo.stargazers_count,
+                'forks_count': repo.forks_count,
+                'language': repo.language,
+                'updated_at': repo.updated_at.isoformat() if repo.updated_at else None,
+                'pushed_at': repo.pushed_at.isoformat() if repo.pushed_at else None,
+            })
+
+        return Response({
+            'repositories': repos_list,
+            'total_count': total_count,
+            'page': page,
+            'per_page': per_page,
+            'has_next': end_idx < total_count,
+            'has_previous': page > 1,
+        }, status=status.HTTP_200_OK)
+
+    except GithubException as e:
+        return Response({
+            'error': f'GitHub API error: {str(e)}'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({
+            'error': f'Error fetching repositories: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
