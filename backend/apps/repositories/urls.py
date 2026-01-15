@@ -1,5 +1,10 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import RepositoryViewSet
+
+router = DefaultRouter()
+router.register(r'', RepositoryViewSet, basename='repository')
 
 urlpatterns = [
-    # Repository endpoints will be added here
+    path('', include(router.urls)),
 ]

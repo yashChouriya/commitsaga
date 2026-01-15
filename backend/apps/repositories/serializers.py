@@ -11,8 +11,8 @@ from .models import (
 )
 import re
 
-# Maximum repositories per user
-MAX_REPOSITORIES_PER_USER = 2
+# Maximum repositories per user (limited to 1 for now)
+MAX_REPOSITORIES_PER_USER = 1
 
 
 class ContributorSerializer(serializers.ModelSerializer):
