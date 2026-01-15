@@ -259,7 +259,9 @@ export default function DashboardPage() {
     (repo) =>
       repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       repo.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (repo.description?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+      (repo.description?.toLowerCase() || "").includes(
+        searchQuery.toLowerCase()
+      )
   );
 
   if (loading || !user) {
@@ -287,7 +289,7 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="pt-24 pb-12 px-4">
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto max-w-8xl">
           {/* Welcome Section */}
           <AnimatedSection animation="fade-up" delay={0}>
             <div className="mb-8">
@@ -440,7 +442,7 @@ export default function DashboardPage() {
                 </div>
               </GlassCard>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {repositories.map((repo) => (
                   <RepositoryCard
                     key={repo.id}
@@ -656,29 +658,32 @@ export default function DashboardPage() {
               </div>
 
               {/* Pagination */}
-              {!loadingGithubRepos && !githubReposError && totalCount > REPOS_PER_PAGE && (
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/10 shrink-0">
-                  <span className="text-sm text-gray-400">
-                    Page {currentPage} of {Math.ceil(totalCount / REPOS_PER_PAGE)}
-                  </span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => loadGithubRepos(currentPage - 1)}
-                      disabled={!hasPrevPage || loadingGithubRepos}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => loadGithubRepos(currentPage + 1)}
-                      disabled={!hasNextPage || loadingGithubRepos}
-                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+              {!loadingGithubRepos &&
+                !githubReposError &&
+                totalCount > REPOS_PER_PAGE && (
+                  <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/10 shrink-0">
+                    <span className="text-sm text-gray-400">
+                      Page {currentPage} of{" "}
+                      {Math.ceil(totalCount / REPOS_PER_PAGE)}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => loadGithubRepos(currentPage - 1)}
+                        disabled={!hasPrevPage || loadingGithubRepos}
+                        className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => loadGithubRepos(currentPage + 1)}
+                        disabled={!hasNextPage || loadingGithubRepos}
+                        className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Error message */}
               {addError && (
@@ -706,7 +711,9 @@ export default function DashboardPage() {
                   disabled={!selectedRepo || addingRepo}
                   className="flex-1"
                 >
-                  {selectedRepo ? `Import ${selectedRepo.name}` : "Select a repository"}
+                  {selectedRepo
+                    ? `Import ${selectedRepo.name}`
+                    : "Select a repository"}
                 </Button>
               </div>
             </GlassCard>
@@ -740,23 +747,60 @@ function RepositoryCard({
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         {/* Repository Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <FolderGit2 className="w-5 h-5 text-violet-400 shrink-0" />
-            <h3 className="text-lg font-semibold text-white truncate">
-              {repository.full_name}
-            </h3>
-            <a
-              href={repository.github_repo_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-violet-400 transition-colors shrink-0"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
+          <div className="md:flex md:justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <FolderGit2 className="w-5 h-5 text-violet-400 shrink-0" />
+              <h3 className="text-lg font-semibold text-white truncate">
+                {repository.full_name}
+              </h3>
+              <a
+                href={repository.github_repo_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-violet-400 transition-colors shrink-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Status & Actions */}
+            <div className="flex items-center gap-3">
+              <div className={`flex items-center gap-1.5 ${status.color}`}>
+                {status.icon}
+                <span className="text-sm font-medium">{status.label}</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onReanalyze}
+                  disabled={isReanalyzing || isAnalyzing}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Re-analyze"
+                >
+                  {isReanalyzing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                </button>
+                <button
+                  onClick={onDelete}
+                  disabled={isDeleting}
+                  className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Delete"
+                >
+                  {isDeleting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
           {repository.description && (
-            <p className="text-gray-400 text-sm truncate mb-2">
+            <p className="text-gray-400 text-sm mb-2">
               {repository.description}
             </p>
           )}
@@ -781,41 +825,6 @@ function RepositoryCard({
               <GitBranch className="w-4 h-4" />
               {repository.commits_count} commits
             </span>
-          </div>
-        </div>
-
-        {/* Status & Actions */}
-        <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-1.5 ${status.color}`}>
-            {status.icon}
-            <span className="text-sm font-medium">{status.label}</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onReanalyze}
-              disabled={isReanalyzing || isAnalyzing}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Re-analyze"
-            >
-              {isReanalyzing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-            </button>
-            <button
-              onClick={onDelete}
-              disabled={isDeleting}
-              className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Delete"
-            >
-              {isDeleting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4" />
-              )}
-            </button>
           </div>
         </div>
       </div>
