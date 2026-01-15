@@ -8,4 +8,5 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('validate-pat/', views.validate_github_pat, name='validate-pat'),
     path('check-pat/', views.check_pat_status, name='check-pat'),
+    path('github-repos/', views.list_github_repos, name='github-repos'),
 ]
