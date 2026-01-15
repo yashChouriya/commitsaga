@@ -1,3 +1,4 @@
+import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from cryptography.fernet import Fernet
@@ -7,6 +8,7 @@ from django.conf import settings
 class User(AbstractUser):
     """Custom user model with GitHub PAT storage"""
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     github_token = models.TextField(blank=True, null=True, help_text="Encrypted GitHub Personal Access Token")
     github_username = models.CharField(max_length=255, blank=True, null=True)
