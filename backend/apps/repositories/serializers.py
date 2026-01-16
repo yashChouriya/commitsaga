@@ -233,6 +233,8 @@ class OverallSummarySerializer(serializers.ModelSerializer):
 class ExportSerializer(serializers.ModelSerializer):
     """Serializer for Export model"""
 
+    download_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Export
         fields = [
@@ -242,9 +244,41 @@ class ExportSerializer(serializers.ModelSerializer):
             'date_range_end',
             'file_path',
             'file_size',
+            'download_url',
             'created_at',
         ]
         read_only_fields = ['id', 'file_path', 'file_size', 'created_at']
+
+    def get_download_url(self, obj):
+        return f"/api/exports/{obj.id}/download/"
+
+
+class CreateExportSerializer(serializers.Serializer):
+    """Serializer for creating a new export"""
+
+    export_type = serializers.ChoiceField(choices=Export.ExportType.choices)
+    date_range_start = serializers.DateField(required=False, allow_null=True)
+    date_range_end = serializers.DateField(required=False, allow_null=True)
+
+    def validate(self, attrs):
+        export_type = attrs.get('export_type')
+        date_range_start = attrs.get('date_range_start')
+        date_range_end = attrs.get('date_range_end')
+
+        # Weekly/Monthly exports require date range
+        if export_type in ['weekly', 'monthly']:
+            if not date_range_start or not date_range_end:
+                raise serializers.ValidationError({
+                    'date_range_start': 'Date range is required for weekly/monthly exports.',
+                    'date_range_end': 'Date range is required for weekly/monthly exports.',
+                })
+
+            if date_range_start > date_range_end:
+                raise serializers.ValidationError({
+                    'date_range_start': 'Start date must be before end date.',
+                })
+
+        return attrs
 
 
 class RepositorySerializer(serializers.ModelSerializer):
