@@ -226,7 +226,7 @@ Write in a professional, informative tone. Focus on insights that would help som
 
         try:
             response = self.client.messages.create(
-                model=self.model_quality,
+                model=self.model_fast,
                 max_tokens=10000,
                 messages=[{"role": "user", "content": prompt}],
             )

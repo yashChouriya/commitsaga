@@ -3,12 +3,20 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  github_username: string;
+  has_github_token: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 // Repository types
-export type AnalysisStatus = 'pending' | 'fetching' | 'analyzing' | 'completed' | 'failed';
-export type CronFrequency = 'weekly' | 'monthly';
+export type AnalysisStatus =
+  | "pending"
+  | "fetching"
+  | "analyzing"
+  | "completed"
+  | "failed";
+export type CronFrequency = "weekly" | "monthly";
 
 export interface Repository {
   id: string;
@@ -96,7 +104,7 @@ export interface CommitData {
 // Commit Group types
 export interface CommitGroup {
   id: string;
-  group_type: 'weekly' | 'monthly';
+  group_type: "weekly" | "monthly";
   start_date: string;
   end_date: string;
   commit_count: number;
@@ -114,7 +122,7 @@ export interface CommitGroup {
 
 export interface CommitGroupListItem {
   id: string;
-  group_type: 'weekly' | 'monthly';
+  group_type: "weekly" | "monthly";
   start_date: string;
   end_date: string;
   commit_count: number;
@@ -124,7 +132,7 @@ export interface CommitGroupListItem {
 }
 
 // Pull Request types
-export type PRState = 'open' | 'closed' | 'merged';
+export type PRState = "open" | "closed" | "merged";
 
 export interface PRComment {
   author: string;
@@ -168,7 +176,7 @@ export interface PullRequestListItem {
 }
 
 // Issue types
-export type IssueState = 'open' | 'closed';
+export type IssueState = "open" | "closed";
 
 export interface IssueComment {
   author: string;
@@ -224,7 +232,7 @@ export interface OverallSummary {
 }
 
 // Export types
-export type ExportType = 'weekly' | 'monthly' | 'complete';
+export type ExportType = "weekly" | "monthly" | "complete";
 
 export interface Export {
   id: string;

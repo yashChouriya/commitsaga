@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
+import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
 interface GlassCardProps {
   children: ReactNode;
@@ -9,22 +9,25 @@ interface GlassCardProps {
   hover?: boolean;
   glow?: boolean;
   animate?: boolean;
+  onClick?: () => void;
 }
 
 export function GlassCard({
   children,
   className,
+  onClick = () => {},
   hover = false,
   glow = false,
   animate = false,
 }: GlassCardProps) {
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'glass-card rounded-2xl p-6',
-        hover && 'glass-card-hover cursor-pointer',
-        glow && 'animate-pulse-glow',
-        animate && 'animate-fade-in-up opacity-0',
+        "glass-card rounded-2xl p-6",
+        hover && "glass-card-hover cursor-pointer",
+        glow && "animate-pulse-glow",
+        animate && "animate-fade-in-up opacity-0",
         className
       )}
     >
@@ -47,8 +50,8 @@ export function GlassInput({ icon, className, ...props }: GlassInputProps) {
       )}
       <input
         className={cn(
-          'w-full glass-input rounded-xl py-3 px-4 text-white placeholder:text-gray-500',
-          icon && 'pl-12',
+          "w-full glass-input rounded-xl py-3 px-4 text-white placeholder:text-gray-500",
+          icon && "pl-12",
           className
         )}
         {...props}
