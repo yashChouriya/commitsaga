@@ -241,6 +241,7 @@ export interface Export {
   date_range_end: string | null;
   file_path: string;
   file_size: number;
+  download_url: string;
   created_at: string;
 }
 
