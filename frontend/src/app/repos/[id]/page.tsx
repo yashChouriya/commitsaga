@@ -119,7 +119,7 @@ export default function RepositoryOverviewPage() {
       <AnimatedSection animation="fade-up" delay={300}>
         <GlassCard>
           <div className="flex items-start gap-4 mb-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+            <div className="h-12 w-12 rounded-xl bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -128,7 +128,9 @@ export default function RepositoryOverviewPage() {
               </h2>
               <p className="text-sm text-gray-400">
                 {summary?.analysis_period_start && summary?.analysis_period_end
-                  ? `Analysis period: ${formatDate(summary.analysis_period_start)} - ${formatDate(summary.analysis_period_end)}`
+                  ? `Analysis period: ${formatDate(
+                      summary.analysis_period_start
+                    )} - ${formatDate(summary.analysis_period_end)}`
                   : "Powered by Claude AI"}
               </p>
             </div>
@@ -156,7 +158,7 @@ export default function RepositoryOverviewPage() {
           <GlassCard className="h-full">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center">
                   <Trophy className="h-5 w-5 text-white" />
                 </div>
                 <h2 className="text-lg font-semibold text-white">
@@ -194,7 +196,7 @@ export default function RepositoryOverviewPage() {
           <GlassCard className="h-full">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-white" />
                 </div>
                 <h2 className="text-lg font-semibold text-white">
@@ -230,7 +232,7 @@ export default function RepositoryOverviewPage() {
           {/* PR Summary */}
           <GlassCard>
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                 <GitPullRequest className="h-5 w-5 text-white" />
               </div>
               <h2 className="text-lg font-semibold text-white">
@@ -279,7 +281,7 @@ export default function RepositoryOverviewPage() {
           {/* Issues Summary */}
           <GlassCard>
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center">
                 <CircleDot className="h-5 w-5 text-white" />
               </div>
               <h2 className="text-lg font-semibold text-white">Issues</h2>
@@ -340,7 +342,10 @@ function StatCard({
   return (
     <GlassCard className="text-center py-6">
       <div
-        className={`h-12 w-12 rounded-xl bg-gradient-to-br ${colorClasses[color].split(" ").slice(0, 2).join(" ")} flex items-center justify-center mx-auto mb-3`}
+        className={`h-12 w-12 rounded-xl bg-linear-to-br ${colorClasses[color]
+          .split(" ")
+          .slice(0, 2)
+          .join(" ")} flex items-center justify-center mx-auto mb-3`}
       >
         <Icon className="w-6 h-6 text-white" />
       </div>
@@ -385,7 +390,7 @@ function ContributorRow({
             className="w-10 h-10 rounded-full"
           />
         ) : (
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center">
             <span className="text-white font-medium">
               {contributor.github_username[0].toUpperCase()}
             </span>

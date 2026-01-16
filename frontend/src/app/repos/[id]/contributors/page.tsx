@@ -65,7 +65,7 @@ export default function ContributorsPage() {
       <AnimatedSection animation="fade-up" delay={200}>
         <GlassCard>
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+            <div className="h-14 w-14 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center">
               <Trophy className="h-7 w-7 text-white" />
             </div>
             <div>
@@ -97,7 +97,7 @@ export default function ContributorsPage() {
           <AnimatedSection animation="fade-up" delay={300}>
             <div className="grid md:grid-cols-3 gap-4">
               {/* Second Place */}
-              <div className="order-2 md:order-1 md:mt-8">
+              <div className="order-2 md:order-1">
                 {topThree[1] && (
                   <PodiumCard
                     contributor={topThree[1]}
@@ -214,11 +214,25 @@ function PodiumCard({
           <img
             src={contributor.avatar_url}
             alt={contributor.github_username}
-            className={`w-20 h-20 rounded-full mx-auto border-4 ${rank === 1 ? "border-yellow-500" : rank === 2 ? "border-gray-400" : "border-amber-600"}`}
+            className={`w-20 h-20 rounded-full mx-auto border-4 ${
+              rank === 1
+                ? "border-yellow-500"
+                : rank === 2
+                ? "border-gray-400"
+                : "border-amber-600"
+            }`}
           />
         ) : (
           <div
-            className={`w-20 h-20 rounded-full mx-auto bg-gradient-to-br ${config.gradient} flex items-center justify-center border-4 ${rank === 1 ? "border-yellow-500" : rank === 2 ? "border-gray-400" : "border-amber-600"}`}
+            className={`w-20 h-20 rounded-full mx-auto bg-linear-to-br ${
+              config.gradient
+            } flex items-center justify-center border-4 ${
+              rank === 1
+                ? "border-yellow-500"
+                : rank === 2
+                ? "border-gray-400"
+                : "border-amber-600"
+            }`}
           >
             <span className="text-2xl font-bold text-white">
               {contributor.github_username[0].toUpperCase()}
@@ -226,7 +240,7 @@ function PodiumCard({
           </div>
         )}
         <div
-          className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-br ${config.gradient} flex items-center justify-center shadow-lg`}
+          className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-linear-to-br ${config.gradient} flex items-center justify-center shadow-lg`}
         >
           <Icon className="w-5 h-5 text-white" />
         </div>
@@ -246,7 +260,9 @@ function PodiumCard({
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div className="p-2 bg-white/5 rounded-lg">
           <p className="text-gray-400">Commits</p>
-          <p className="font-semibold text-white">{contributor.total_commits}</p>
+          <p className="font-semibold text-white">
+            {contributor.total_commits}
+          </p>
         </div>
         <div className="p-2 bg-white/5 rounded-lg">
           <p className="text-gray-400">PRs</p>
@@ -285,7 +301,7 @@ function LeaderboardRow({
             className="w-12 h-12 rounded-full"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center">
             <span className="text-white font-medium">
               {contributor.github_username[0].toUpperCase()}
             </span>
@@ -342,7 +358,7 @@ function ContributorModal({
                   className="w-16 h-16 rounded-full"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-linear-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                   <span className="text-2xl text-white font-medium">
                     {contributor.github_username[0].toUpperCase()}
                   </span>

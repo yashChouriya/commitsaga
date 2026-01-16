@@ -78,7 +78,7 @@ export default function TimelinePage() {
       <AnimatedSection animation="fade-up" delay={200}>
         <GlassCard>
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+            <div className="h-14 w-14 rounded-xl bg-linear-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
               <Calendar className="h-7 w-7 text-white" />
             </div>
             <div>
@@ -143,18 +143,20 @@ function TimelineCard({
   return (
     <div className="relative md:pl-16">
       {/* Timeline dot */}
-      <div className="absolute left-4 top-6 w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 border-4 border-[#0a0a0f] hidden md:flex items-center justify-center">
+      <div className="absolute left-4 top-6 w-5 h-5 rounded-full bg-linear-to-br from-violet-500 to-purple-600 border-4 border-[#0a0a0f] hidden md:flex items-center justify-center">
         <div className="w-2 h-2 rounded-full bg-white" />
       </div>
 
       <GlassCard
-        className={`cursor-pointer transition-all ${isExpanded ? "ring-1 ring-violet-500/30" : ""}`}
+        className={`cursor-pointer transition-all ${
+          isExpanded ? "ring-1 ring-violet-500/30" : ""
+        }`}
         hover
       >
         {/* Header */}
         <div onClick={onToggle} className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-600/20 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-xl bg-linear-to-br from-violet-500/20 to-purple-600/20 flex items-center justify-center">
               <GitCommit className="h-6 w-6 text-violet-400" />
             </div>
             <div>
@@ -169,7 +171,9 @@ function TimelineCard({
               <p className="text-sm text-gray-400">
                 {group.commit_count} commits
                 {group.main_contributors.length > 0 &&
-                  ` by ${group.main_contributors.slice(0, 3).join(", ")}${group.main_contributors.length > 3 ? " and others" : ""}`}
+                  ` by ${group.main_contributors.slice(0, 3).join(", ")}${
+                    group.main_contributors.length > 3 ? " and others" : ""
+                  }`}
               </p>
             </div>
           </div>
@@ -292,7 +296,9 @@ function TimelineCard({
                           +{commit.additions}
                         </span>
                         {" / "}
-                        <span className="text-red-400">-{commit.deletions}</span>
+                        <span className="text-red-400">
+                          -{commit.deletions}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -334,7 +340,9 @@ function InsightSection({
         {items.map((item, index) => (
           <li key={index} className="flex items-start gap-2 text-sm">
             <span
-              className={`w-1.5 h-1.5 rounded-full mt-2 ${colorClasses[color].split(" ")[0].replace("text-", "bg-")}`}
+              className={`w-1.5 h-1.5 rounded-full mt-2 ${colorClasses[color]
+                .split(" ")[0]
+                .replace("text-", "bg-")}`}
             />
             <span className="text-gray-300">{item}</span>
           </li>

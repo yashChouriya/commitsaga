@@ -114,12 +114,14 @@ export default function IssuesPage() {
         <GlassCard>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <div className="h-14 w-14 rounded-xl bg-linear-to-br from-amber-500 to-orange-600 flex items-center justify-center">
                 <CircleDot className="h-7 w-7 text-white" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">Issues</h2>
-                <p className="text-gray-400">{stats.total} total issues tracked</p>
+                <p className="text-gray-400">
+                  {stats.total} total issues tracked
+                </p>
               </div>
             </div>
 
@@ -262,7 +264,11 @@ function IssueSection({
 
         <div className="space-y-2">
           {issues.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} onClick={() => onSelect(issue)} />
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              onClick={() => onSelect(issue)}
+            />
           ))}
         </div>
       </div>
@@ -287,7 +293,9 @@ function IssueCard({
     >
       <div className="flex items-start gap-4">
         <div
-          className={`p-2 rounded-lg ${isOpen ? "bg-green-500/10" : "bg-violet-500/10"}`}
+          className={`p-2 rounded-lg ${
+            isOpen ? "bg-green-500/10" : "bg-violet-500/10"
+          }`}
         >
           {isOpen ? (
             <CircleDot className="w-5 h-5 text-green-400" />
@@ -323,7 +331,9 @@ function IssueCard({
               {issue.labels.slice(0, 4).map((label) => (
                 <span
                   key={label}
-                  className={`px-2 py-1 rounded text-xs ${getLabelStyle(label)}`}
+                  className={`px-2 py-1 rounded text-xs ${getLabelStyle(
+                    label
+                  )}`}
                 >
                   {label}
                 </span>
@@ -376,7 +386,11 @@ function IssueDetailModal({
               <div className="flex items-start justify-between mb-4 shrink-0">
                 <div className="flex items-start gap-3">
                   <div
-                    className={`p-2 rounded-lg ${issue.state === "open" ? "bg-green-500/10" : "bg-violet-500/10"}`}
+                    className={`p-2 rounded-lg ${
+                      issue.state === "open"
+                        ? "bg-green-500/10"
+                        : "bg-violet-500/10"
+                    }`}
                   >
                     {issue.state === "open" ? (
                       <CircleDot className="w-5 h-5 text-green-400" />
@@ -391,7 +405,11 @@ function IssueDetailModal({
                     <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
                       <span>#{issue.issue_number}</span>
                       <span
-                        className={`px-2 py-0.5 rounded text-xs ${issue.state === "open" ? "bg-green-500/10 text-green-400" : "bg-violet-500/10 text-violet-400"}`}
+                        className={`px-2 py-0.5 rounded text-xs ${
+                          issue.state === "open"
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-violet-500/10 text-violet-400"
+                        }`}
                       >
                         {issue.state}
                       </span>
@@ -488,7 +506,9 @@ function IssueDetailModal({
                       {issue.labels.map((label) => (
                         <span
                           key={label}
-                          className={`px-3 py-1 rounded-full text-sm ${getLabelStyle(label)}`}
+                          className={`px-3 py-1 rounded-full text-sm ${getLabelStyle(
+                            label
+                          )}`}
                         >
                           {label}
                         </span>

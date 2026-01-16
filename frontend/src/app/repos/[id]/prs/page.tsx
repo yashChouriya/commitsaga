@@ -96,14 +96,16 @@ export default function PullRequestsPage() {
         <GlassCard>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+              <div className="h-14 w-14 rounded-xl bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                 <GitPullRequest className="h-7 w-7 text-white" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">
                   Pull Requests
                 </h2>
-                <p className="text-gray-400">{stats.total} total pull requests</p>
+                <p className="text-gray-400">
+                  {stats.total} total pull requests
+                </p>
               </div>
             </div>
 
@@ -344,7 +346,9 @@ function PRDetailModal({
                     <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
                       <span>#{pr.pr_number}</span>
                       <span
-                        className={`px-2 py-0.5 rounded text-xs ${stateConfig[pr.state].bg} ${stateConfig[pr.state].color}`}
+                        className={`px-2 py-0.5 rounded text-xs ${
+                          stateConfig[pr.state].bg
+                        } ${stateConfig[pr.state].color}`}
                       >
                         {stateConfig[pr.state].label}
                       </span>
@@ -374,7 +378,8 @@ function PRDetailModal({
                     <p className="text-white font-medium">@{pr.author}</p>
                     <p className="text-sm text-gray-400">
                       opened on {formatDate(pr.created_at_github)}
-                      {pr.merged_at && ` • merged on ${formatDate(pr.merged_at)}`}
+                      {pr.merged_at &&
+                        ` • merged on ${formatDate(pr.merged_at)}`}
                     </p>
                   </div>
                 </div>
