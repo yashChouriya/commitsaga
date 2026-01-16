@@ -11,10 +11,10 @@ interface MarkdownProps {
 
 export function Markdown({ content, className }: MarkdownProps) {
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      className={cn("markdown-content", className)}
-      components={{
+    <div className={cn("markdown-content", className)}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
         // Headings
         h1: ({ children }) => (
           <h1 className="text-2xl font-bold text-white mt-6 mb-4 first:mt-0">
@@ -138,5 +138,6 @@ export function Markdown({ content, className }: MarkdownProps) {
     >
       {content}
     </ReactMarkdown>
+    </div>
   );
 }
