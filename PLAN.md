@@ -298,10 +298,16 @@ commitsaga/
      - Include related issues
      - Call Claude API for structured summary
      - Parse response and store in CommitGroup.summary
-  2. Calculate contributor impact scores:
-     - Based on: commits, lines changed, PRs merged, issues resolved
-     - Weight recent activity higher
-     - Store in Contributor.impact_score
+  2. Calculate contributor impact scores (Total: 100 points):
+     - **Commit Volume** (20 points): Quantity of meaningful commits
+     - **Code Impact** (25 points): Lines changed, weighted by recency
+     - **PR Quality** (20 points): Merged PRs, review participation, discussion quality
+     - **Issue Resolution** (15 points): Issues resolved, weighted by complexity/labels
+     - **Consistency** (10 points): Active weeks over analysis period
+     - **Collaboration** (10 points): Reviews given, issue discussions, documentation
+     - Assign badges: 🏆 Gold (80-100), 🥈 Silver (60-79), 🥉 Bronze (40-59), ⭐ Rising Star (20-39)
+     - Special badges: Bug Hunter, Code Reviewer, Documentarian, Impact Player, Consistent Contributor
+     - Store in Contributor model with score breakdown
   3. Generate overall repository summary:
      - Aggregate all CommitGroup summaries
      - Include top contributors
