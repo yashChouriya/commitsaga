@@ -6,10 +6,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from apps.repositories.urls import export_urlpatterns
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.users.urls')),
     path('api/repositories/', include('apps.repositories.urls')),
+    path('api/exports/', include(export_urlpatterns)),
     path('api/analysis/', include('apps.analysis.urls')),
 ]
 

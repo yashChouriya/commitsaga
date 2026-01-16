@@ -19,6 +19,7 @@ import {
   Users,
   GitPullRequest,
   CircleDot,
+  FileText,
   ArrowLeft,
   ExternalLink,
   Star,
@@ -33,6 +34,7 @@ const navItems = [
   { href: "/contributors", label: "Contributors", icon: Users },
   { href: "/prs", label: "Pull Requests", icon: GitPullRequest },
   { href: "/issues", label: "Issues", icon: CircleDot },
+  { href: "/export", label: "Export", icon: FileText },
 ];
 
 export default function RepositoryLayout({

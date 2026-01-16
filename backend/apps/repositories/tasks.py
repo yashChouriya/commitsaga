@@ -799,3 +799,311 @@ def _generate_overall_summary(repository, ai_client, group_summaries):
     )
 
     logger.info(f"Generated overall summary for {repository.full_name}")
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def generate_markdown_export(
+    self,
+    repository_id: str,
+    export_type: str,
+    date_range_start: str = None,
+    date_range_end: str = None,
+):
+    """
+    Generate a markdown export for a repository.
+
+    This task:
+    1. Fetches data based on export_type and date range
+    2. Generates structured markdown with sections
+    3. Saves markdown to file system
+    4. Creates Export record in DB
+    """
+    import os
+    from django.conf import settings
+    from .models import (
+        Repository,
+        CommitGroup,
+        CommitData,
+        Contributor,
+        PullRequest,
+        Issue,
+        OverallSummary,
+        Export,
+    )
+
+    try:
+        repository = Repository.objects.get(id=repository_id)
+    except Repository.DoesNotExist:
+        logger.error(f"Repository {repository_id} not found")
+        return
+
+    try:
+        # Parse date range if provided
+        start_date = None
+        end_date = None
+        if date_range_start and date_range_end:
+            from datetime import datetime as dt
+            start_date = dt.strptime(date_range_start, "%Y-%m-%d").date()
+            end_date = dt.strptime(date_range_end, "%Y-%m-%d").date()
+
+        # Build the markdown content
+        markdown_content = _generate_markdown_content(
+            repository=repository,
+            export_type=export_type,
+            start_date=start_date,
+            end_date=end_date,
+        )
+
+        # Create exports directory if it doesn't exist
+        exports_dir = os.path.join(settings.BASE_DIR, "exports")
+        os.makedirs(exports_dir, exist_ok=True)
+
+        # Generate filename
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        safe_repo_name = repository.full_name.replace("/", "_")
+
+        if export_type == "complete":
+            filename = f"{safe_repo_name}_complete_{timestamp}.md"
+        else:
+            filename = f"{safe_repo_name}_{export_type}_{date_range_start}_{date_range_end}_{timestamp}.md"
+
+        file_path = os.path.join(exports_dir, filename)
+
+        # Write markdown to file
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(markdown_content)
+
+        file_size = os.path.getsize(file_path)
+
+        # Create Export record
+        export = Export.objects.create(
+            repository=repository,
+            export_type=export_type,
+            date_range_start=start_date,
+            date_range_end=end_date,
+            file_path=file_path,
+            file_size=file_size,
+        )
+
+        logger.info(
+            f"Generated {export_type} export for {repository.full_name}: {file_path}"
+        )
+
+        return str(export.id)
+
+    except Exception as e:
+        logger.error(f"Error generating export for {repository.full_name}: {e}")
+        raise
+
+
+def _generate_markdown_content(
+    repository,
+    export_type: str,
+    start_date=None,
+    end_date=None,
+) -> str:
+    """Generate markdown content for export."""
+    from .models import (
+        CommitGroup,
+        CommitData,
+        Contributor,
+        PullRequest,
+        Issue,
+        OverallSummary,
+    )
+
+    lines = []
+
+    # Header
+    lines.append("# CommitSaga Analysis Export\n")
+    lines.append(f"## Repository: {repository.full_name}\n")
+    lines.append(f"**Branch:** {repository.branch}")
+    lines.append(f"**Export Type:** {export_type.capitalize()}")
+
+    if start_date and end_date:
+        lines.append(f"**Period:** {start_date} to {end_date}")
+
+    lines.append(f"**Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}\n")
+    lines.append("---\n")
+
+    # Filter data based on date range
+    if start_date and end_date:
+        commit_groups = CommitGroup.objects.filter(
+            repository=repository,
+            start_date__gte=start_date,
+            end_date__lte=end_date,
+        ).order_by("start_date")
+
+        pull_requests = PullRequest.objects.filter(
+            repository=repository,
+            created_at_github__date__gte=start_date,
+            created_at_github__date__lte=end_date,
+        ).order_by("-created_at_github")
+
+        issues = Issue.objects.filter(
+            repository=repository,
+            created_at_github__date__gte=start_date,
+            created_at_github__date__lte=end_date,
+        ).order_by("-created_at_github")
+    else:
+        commit_groups = CommitGroup.objects.filter(
+            repository=repository
+        ).order_by("start_date")
+
+        pull_requests = PullRequest.objects.filter(
+            repository=repository
+        ).order_by("-created_at_github")
+
+        issues = Issue.objects.filter(
+            repository=repository
+        ).order_by("-created_at_github")
+
+    contributors = Contributor.objects.filter(
+        repository=repository
+    ).order_by("-impact_score")
+
+    # Repository Overview
+    lines.append("## Repository Overview\n")
+    lines.append(f"- **Total Commits:** {repository.commits.count()}")
+    lines.append(f"- **Contributors:** {contributors.count()}")
+    lines.append(f"- **Pull Requests:** {pull_requests.count()} ({pull_requests.filter(state='merged').count()} merged, {pull_requests.filter(state='open').count()} open)")
+    lines.append(f"- **Issues:** {issues.count()} ({issues.filter(state='closed').count()} closed, {issues.filter(state='open').count()} open)\n")
+
+    # Overall Summary (for complete exports)
+    if export_type == "complete":
+        overall_summary = OverallSummary.objects.filter(repository=repository).first()
+        if overall_summary:
+            lines.append("## Summary\n")
+            lines.append(overall_summary.summary_text)
+            lines.append("\n---\n")
+
+    # Commit Groups
+    if commit_groups.exists():
+        lines.append("## Development Timeline\n")
+
+        for group in commit_groups:
+            group_type_label = "Week" if group.group_type == "weekly" else "Month"
+            lines.append(f"### {group_type_label} of {group.start_date} to {group.end_date}\n")
+
+            if group.summary:
+                lines.append("#### Summary\n")
+                lines.append(group.summary)
+                lines.append("")
+
+            # Key Changes
+            if group.key_changes:
+                lines.append("#### Key Changes\n")
+                for change in group.key_changes:
+                    lines.append(f"- {change}")
+                lines.append("")
+
+            # Notable Features
+            if group.notable_features:
+                lines.append("#### Notable Features\n")
+                for feature in group.notable_features:
+                    lines.append(f"- {feature}")
+                lines.append("")
+
+            # Bug Fixes
+            if group.bug_fixes:
+                lines.append("#### Bug Fixes\n")
+                for fix in group.bug_fixes:
+                    lines.append(f"- {fix}")
+                lines.append("")
+
+            # Key Commits
+            commits = CommitData.objects.filter(commit_group=group).order_by("-commit_date")[:10]
+            if commits:
+                lines.append("#### Key Commits\n")
+                for commit in commits:
+                    msg = commit.commit_message.split("\n")[0][:80]
+                    lines.append(f"- `{commit.commit_sha[:7]}` - {msg} (by @{commit.author_name})")
+                lines.append("")
+
+            lines.append("---\n")
+
+    # Pull Requests
+    if pull_requests.exists():
+        lines.append("## Pull Requests\n")
+
+        for pr in pull_requests[:50]:  # Limit to 50 PRs
+            state_emoji = "🟢" if pr.state == "open" else "🟣" if pr.state == "merged" else "🔴"
+            lines.append(f"### {state_emoji} PR #{pr.pr_number}: {pr.title}\n")
+            lines.append(f"**Author:** @{pr.author}")
+            lines.append(f"**Status:** {pr.state.capitalize()}")
+            lines.append(f"**Created:** {pr.created_at_github.strftime('%Y-%m-%d')}")
+
+            if pr.merged_at:
+                lines.append(f"**Merged:** {pr.merged_at.strftime('%Y-%m-%d')}")
+
+            lines.append(f"**Changes:** +{pr.additions} / -{pr.deletions} ({pr.changed_files} files)\n")
+
+            if pr.description:
+                lines.append("**Description:**")
+                lines.append(pr.description[:500] + ("..." if len(pr.description) > 500 else ""))
+                lines.append("")
+
+            # Discussion highlights
+            if pr.discussion:
+                lines.append("**Discussion Highlights:**\n")
+                for comment in pr.discussion[:5]:  # Limit to 5 comments
+                    lines.append(f"- **@{comment.get('author', 'unknown')}:** {comment.get('body', '')[:200]}")
+                lines.append("")
+
+            lines.append("---\n")
+
+    # Issues
+    if issues.exists():
+        lines.append("## Issues\n")
+
+        for issue in issues[:50]:  # Limit to 50 issues
+            state_emoji = "🟢" if issue.state == "open" else "✅"
+            lines.append(f"### {state_emoji} Issue #{issue.issue_number}: {issue.title}\n")
+            lines.append(f"**Author:** @{issue.author}")
+            lines.append(f"**Status:** {issue.state.capitalize()}")
+            lines.append(f"**Created:** {issue.created_at_github.strftime('%Y-%m-%d')}")
+
+            if issue.closed_at:
+                lines.append(f"**Closed:** {issue.closed_at.strftime('%Y-%m-%d')}")
+
+            if issue.labels:
+                lines.append(f"**Labels:** {', '.join(issue.labels)}")
+
+            lines.append("")
+
+            if issue.problem_description:
+                lines.append("**Problem:**")
+                lines.append(issue.problem_description)
+                lines.append("")
+
+            if issue.solution_description:
+                lines.append("**Solution:**")
+                lines.append(issue.solution_description)
+                lines.append("")
+
+            if issue.description and not issue.problem_description:
+                lines.append("**Description:**")
+                lines.append(issue.description[:500] + ("..." if len(issue.description) > 500 else ""))
+                lines.append("")
+
+            lines.append("---\n")
+
+    # Contributors
+    if contributors.exists():
+        lines.append("## Contributors\n")
+
+        for i, contributor in enumerate(contributors[:20], 1):  # Top 20
+            rank_emoji = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"#{i}"
+            lines.append(f"### {rank_emoji} @{contributor.github_username} (Impact Score: {contributor.impact_score})\n")
+            lines.append(f"- **Commits:** {contributor.total_commits}")
+            lines.append(f"- **Lines Added:** {contributor.total_additions:,}")
+            lines.append(f"- **Lines Removed:** {contributor.total_deletions:,}")
+            lines.append(f"- **PRs Opened/Merged:** {contributor.prs_opened}/{contributor.prs_merged}")
+            lines.append(f"- **Issues Opened/Closed:** {contributor.issues_opened}/{contributor.issues_closed}")
+            lines.append("")
+
+    # Footer
+    lines.append("---\n")
+    lines.append("*Generated by [CommitSaga](https://github.com/yashChouriya/commitsaga) - Understand Your Code History*")
+
+    return "\n".join(lines)
