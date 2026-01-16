@@ -5,12 +5,16 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from github import Github, GithubException
 
+from django.http import FileResponse, Http404
+import os
+
 from .models import (
     Repository,
     Contributor,
     CommitGroup,
     PullRequest,
     Issue,
+    Export,
 )
 from .serializers import (
     RepositorySerializer,
@@ -25,6 +29,8 @@ from .serializers import (
     IssueSerializer,
     IssueListSerializer,
     OverallSummarySerializer,
+    ExportSerializer,
+    CreateExportSerializer,
 )
 
 
@@ -339,3 +345,93 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 'open_issues': repository.open_issues_count,
             }
         })
+
+    @action(detail=True, methods=['get'])
+    def exports(self, request, pk=None):
+        """
+        Get all exports for a repository
+
+        GET /api/repositories/{id}/exports/
+        """
+        repository = self.get_object()
+        exports = repository.exports.all()
+        serializer = ExportSerializer(exports, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='export')
+    def create_export(self, request, pk=None):
+        """
+        Create a new export for a repository
+
+        POST /api/repositories/{id}/export/
+        Body: { "export_type": "complete" } or
+              { "export_type": "weekly", "date_range_start": "2024-01-01", "date_range_end": "2024-01-07" }
+        """
+        repository = self.get_object()
+
+        # Validate repository has been analyzed
+        if repository.analysis_status != Repository.AnalysisStatus.COMPLETED:
+            return Response(
+                {'error': 'Repository analysis must be completed before exporting.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = CreateExportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        export_type = serializer.validated_data['export_type']
+        date_range_start = serializer.validated_data.get('date_range_start')
+        date_range_end = serializer.validated_data.get('date_range_end')
+
+        # Trigger Celery task for generating markdown export
+        from .tasks import generate_markdown_export
+        task = generate_markdown_export.delay(
+            str(repository.id),
+            export_type,
+            str(date_range_start) if date_range_start else None,
+            str(date_range_end) if date_range_end else None,
+        )
+
+        return Response({
+            'message': 'Export generation started.',
+            'task_id': task.id,
+        }, status=status.HTTP_202_ACCEPTED)
+
+
+class ExportViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Export operations
+
+    list: GET /api/exports/
+    retrieve: GET /api/exports/{id}/
+    download: GET /api/exports/{id}/download/
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = ExportSerializer
+
+    def get_queryset(self):
+        """Return exports for repositories owned by the current user"""
+        return Export.objects.filter(repository__user=self.request.user)
+
+    @action(detail=True, methods=['get'])
+    def download(self, request, pk=None):
+        """
+        Download an export file
+
+        GET /api/exports/{id}/download/
+        """
+        export = self.get_object()
+
+        if not export.file_path or not os.path.exists(export.file_path):
+            raise Http404("Export file not found.")
+
+        # Get filename for download
+        filename = os.path.basename(export.file_path)
+
+        response = FileResponse(
+            open(export.file_path, 'rb'),
+            content_type='text/markdown',
+        )
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
