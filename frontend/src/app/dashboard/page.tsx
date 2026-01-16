@@ -375,7 +375,13 @@ export default function DashboardPage() {
                   value: totalContributors.toString(),
                   icon: Users,
                 },
-                { label: "AI Summaries", value: "0", icon: Sparkles },
+                {
+                  label: "AI Summaries",
+                  value: repositories
+                    .filter((r) => r.analysis_status === "completed")
+                    .length.toString(),
+                  icon: Sparkles,
+                },
               ].map((stat) => (
                 <GlassCard key={stat.label} className="text-center py-6">
                   <stat.icon className="w-6 h-6 text-violet-400 mx-auto mb-3" />
@@ -741,10 +747,11 @@ function RepositoryCard({
   const isAnalyzing =
     repository.analysis_status === "fetching" ||
     repository.analysis_status === "analyzing";
+  const isCompleted = repository.analysis_status === "completed";
 
   return (
     <GlassCard hover className="group">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="flex flex-col gap-4">
         {/* Repository Info */}
         <div className="flex-1 min-w-0">
           <div className="md:flex md:justify-between gap-2 mb-2">
@@ -773,7 +780,10 @@ function RepositoryCard({
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={onReanalyze}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReanalyze();
+                  }}
                   disabled={isReanalyzing || isAnalyzing}
                   className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Re-analyze"
@@ -785,7 +795,10 @@ function RepositoryCard({
                   )}
                 </button>
                 <button
-                  onClick={onDelete}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
                   disabled={isDeleting}
                   className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Delete"
@@ -827,6 +840,18 @@ function RepositoryCard({
             </span>
           </div>
         </div>
+
+        {/* View Details Button */}
+        {isCompleted && (
+          <Link
+            href={`/repos/${repository.id}`}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-violet-500/20 to-purple-600/20 hover:from-violet-500/30 hover:to-purple-600/30 border border-violet-500/30 rounded-xl text-violet-400 hover:text-violet-300 font-medium transition-all"
+          >
+            <Sparkles className="w-4 h-4" />
+            View Analysis & Insights
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
       </div>
     </GlassCard>
   );
